@@ -2,8 +2,9 @@ name: Generar APK V3 - Caratula La Doble B
 
 on: {workflow_dispatch: {}}
 
-jobs: build: runs-on: ubuntu-latest
-
+jobs:
+  build:
+    runs-on: ubuntu-latest
     steps:
       - name: Crear proyecto Android
         shell: bash
