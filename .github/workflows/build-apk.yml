@@ -1,7 +1,4 @@
-COPIA TODO EL CONTENIDO DE ESTE ARCHIVO EN:
-.github/workflows/build-apk.yml
-
-name: Generar APK V3 - Caratula La Doble B
+name: Generar APK V3 - La Doble B
 
 "on": {workflow_dispatch: {}}
 
@@ -15,11 +12,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Preparar Gradle 8.7
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
 
       - name: Crear proyecto Android
         shell: bash
@@ -65,8 +57,8 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 31
-                  versionName '3.1'
+                  versionCode 3
+                  versionName '3.0'
               }
           }
           EOF
@@ -515,10 +507,12 @@ jobs:
       - name: Compilar APK
         shell: bash
         run: |
-          gradle assembleDebug
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Guardar APK V3.1
         uses: actions/upload-artifact@v4
         with:
-          name: CalculadoraPlasticos-LaDobleB-Caratula-V3
+          name: CalculadoraPlasticos-LaDobleB-V3
           path: app/build/outputs/apk/debug/app-debug.apk
