@@ -1,4 +1,4 @@
-name: Generar APK V5 DEFINITIVA - La Doble B
+name: Generar APK V6 Costos - La Doble B
 
 "on": {workflow_dispatch: {}}
 
@@ -57,8 +57,8 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 50
-                  versionName '5.0'
+                  versionCode 60
+                  versionName '6.0'
               }
           }
           GRADLE
@@ -123,9 +123,9 @@ jobs:
               final int BORDER = Color.rgb(157,205,255);
               final int WHITE = Color.WHITE;
 
-              EditText w1,l1,t1,q1,d1,w2,l2,p2;
+              EditText w1,l1,t1,q1,d1,vkg1,w2,l2,p2;
               Spinner m1,u1,faces1,tu1,m2,u2,faces2;
-              TextView rw,rqty,rnet,rtotal,rmic,rinch,rmil;
+              TextView rw,rqty,rnet,rtotal,rcostUnit,rcostTotal,rmic,rinch,rmil;
               LinearLayout weightCard, thicknessCard;
               RadioButton rbWeight, rbThickness;
 
@@ -250,7 +250,7 @@ jobs:
                       }
                   });
 
-                  TextView foot = text("LA DOBLE B S.A.S.  •  PLÁSTICOS Y DESECHABLES  •  Versión 5.0",12,WHITE,true);
+                  TextView foot = text("LA DOBLE B S.A.S.  •  PLÁSTICOS Y DESECHABLES  •  Versión 6.0",12,WHITE,true);
                   foot.setGravity(Gravity.CENTER);
                   foot.setPadding(10,8,10,8);
                   foot.setMaxLines(2);
@@ -433,6 +433,9 @@ jobs:
                   label(c,"Desperdicio %");
                   d1=edit("Ej. 3"); addFull(c,d1);
 
+                  label(c,"Valor por kilogramo (antes de IVA)");
+                  vkg1=edit("Ej. 8500"); addFull(c,vkg1);
+
                   Button b=calcButton("▣   CALCULAR PESO");
                   c.addView(b,margins(-1,68,0,8,0,16));
                   b.setOnClickListener(v->calcWeight());
@@ -442,6 +445,8 @@ jobs:
                   rqty=result(rr,"Cantidad","0");
                   rnet=result(rr,"Peso neto total","0.000 kg");
                   rtotal=result(rr,"Materia prima + desperdicio","0.000 kg");
+                  rcostUnit=result(rr,"Costo materia prima antes de IVA · X UND","$ 0.00");
+                  rcostTotal=result(rr,"Costo materia prima antes de IVA · X CANTIDAD","$ 0.00");
               }
 
               void buildThickness(LinearLayout c) {
@@ -526,10 +531,16 @@ jobs:
                       double net=grams*qty/1000.0;
                       double total=net*(1+waste/100.0);
 
+                      double valueKg=val(vkg1);
+                      double costTotal=total*valueKg;
+                      double costUnit=costTotal/qty;
+
                       rw.setText(String.format(Locale.US,"%.3f g",grams));
                       rqty.setText(String.format(Locale.US,"%.0f bolsas",qty));
                       rnet.setText(String.format(Locale.US,"%.3f kg",net));
                       rtotal.setText(String.format(Locale.US,"%.3f kg",total));
+                      rcostUnit.setText(String.format(Locale.US,"$ %.2f",costUnit));
+                      rcostTotal.setText(String.format(Locale.US,"$ %.2f",costTotal));
                   } catch(Exception e) { toast("Revisa los datos ingresados."); }
               }
 
@@ -563,8 +574,8 @@ jobs:
       - name: Ejecutar Gradle
         run: gradle assembleDebug
 
-      - name: Entregar APK V5
+      - name: Entregar APK V6
         uses: actions/upload-artifact@v4
         with:
-          name: CalculadoraPlasticos-LaDobleB-V5
+          name: CalculadoraPlasticos-LaDobleB-V6
           path: app/build/outputs/apk/debug/app-debug.apk
