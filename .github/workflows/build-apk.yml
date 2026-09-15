@@ -57,7 +57,7 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 3
+                  versionCode 31
                   versionName '3.1'
               }
           }
@@ -126,7 +126,7 @@ jobs:
               EditText w1,l1,t1,q1,d1,w2,l2,p2;
               Spinner m1,u1,faces1,tu1,m2,u2,faces2;
               Spinner wu1,lu1,wu2,lu2;
-              TextView rw,rnet,rtotal,rmic,rinch,rmil;
+              TextView rw,rqty,rnet,rtotal,rmic,rinch,rmil;
 
               GradientDrawable rounded(int color, float radius) {
                   GradientDrawable d = new GradientDrawable();
@@ -176,7 +176,7 @@ jobs:
                   head.setGravity(Gravity.CENTER_VERTICAL);
                   head.setPadding(18,10,18,10);
                   head.setBackground(rounded(BLUE,30));
-                  page.addView(head,margins(-1,165,0,0,0,10));
+                  page.addView(head,margins(-1,190,0,0,0,10));
 
                   TextView recycle = text("♻",72,WHITE,true);
                   recycle.setGravity(Gravity.CENTER);
@@ -191,20 +191,20 @@ jobs:
                   a.setGravity(Gravity.CENTER);
                   titles.addView(a);
 
-                  TextView b = text("LA DOBLE B S.A.S.",28,WHITE,true);
+                  TextView b = text("LA DOBLE B S.A.S.",23,WHITE,true);
                   b.setGravity(Gravity.CENTER);
                   titles.addView(b);
 
-                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",15,WHITE,true);
+                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",13,WHITE,true);
                   app.setGravity(Gravity.CENTER);
-                  app.setPadding(24,6,24,6);
+                  app.setPadding(14,5,14,5);
                   app.setBackground(rounded(MID_BLUE,28));
-                  titles.addView(app,margins(-1,45,12,4,12,4));
+                  titles.addView(app,margins(-1,40,12,4,12,4));
 
                   LinearLayout slogan = new LinearLayout(this);
                   slogan.setOrientation(LinearLayout.VERTICAL);
                   slogan.setGravity(Gravity.CENTER);
-                  head.addView(slogan,margins(180,-1,12,0,0,0));
+                  head.addView(slogan,margins(145,-1,12,0,0,0));
                   TextView s1 = text("Juntos por",17,WHITE,true);
                   TextView s2 = text("un planeta",17,WHITE,true);
                   TextView s3 = text("más limpio",17,WHITE,true);
@@ -260,11 +260,11 @@ jobs:
                   LinearLayout tx = new LinearLayout(this);
                   tx.setOrientation(LinearLayout.VERTICAL);
                   h.addView(tx,new LinearLayout.LayoutParams(0,-1,1));
-                  TextView t = text(title,19,WHITE,true);
+                  TextView t = text(title,17,WHITE,true);
                   tx.addView(t);
                   TextView sub = text(subtitle,12,WHITE,false);
                   tx.addView(sub);
-                  c.addView(h,margins(-1,72,0,0,0,10));
+                  c.addView(h,margins(-1,78,0,0,0,10));
               }
 
               TextView label(LinearLayout c,String s) {
@@ -361,10 +361,10 @@ jobs:
                   box.setGravity(Gravity.CENTER_VERTICAL);
                   box.setPadding(12,5,12,5);
                   box.setBackground(outlined(WHITE,Color.rgb(203,226,248),15));
-                  r.addView(box,margins(-1,50,0,5,0,0));
-                  TextView n=text(name.toUpperCase(Locale.ROOT),11,DARK,true);
+                  r.addView(box,margins(-1,64,0,6,0,0));
+                  TextView n=text(name.toUpperCase(Locale.ROOT),10,DARK,true);
                   box.addView(n,new LinearLayout.LayoutParams(0,-1,1));
-                  TextView v=text(value,16,BLUE,true);
+                  TextView v=text(value,15,BLUE,true);
                   v.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
                   box.addView(v);
                   return v;
@@ -381,11 +381,11 @@ jobs:
 
                   label(c,"Ancho");
                   LinearLayout r=fieldRow(c);
-                  w1=edit("Ej. 30"); wu1=spin(new String[]{"cm","in"}); addPair(r,w1,wu1);
+                  w1=edit("Ingrese ancho, ej. 30"); wu1=spin(new String[]{"cm","in"}); addPair(r,w1,wu1);
 
                   label(c,"Largo");
                   r=fieldRow(c);
-                  l1=edit("Ej. 40"); lu1=spin(new String[]{"cm","in"}); addPair(r,l1,lu1);
+                  l1=edit("Ingrese largo, ej. 40"); lu1=spin(new String[]{"cm","in"}); addPair(r,l1,lu1);
 
                   label(c,"Caras / capas");
                   faces1=spin(new String[]{"2 - Bolsa normal","1 - Una cara","3","4"}); addFull(c,faces1);
@@ -394,13 +394,13 @@ jobs:
                   tu1=spin(new String[]{"Micrones (µm)","Pulgadas (in)","Mil"}); addFull(c,tu1);
 
                   label(c,"Calibre / espesor");
-                  t1=edit("Ej. 20"); addFull(c,t1);
+                  t1=edit("Ingrese calibre, ej. 20"); addFull(c,t1);
 
                   label(c,"Cantidad de bolsas");
-                  q1=edit("Ej. 1000"); addFull(c,q1);
+                  q1=edit("Ingrese cantidad, ej. 100"); addFull(c,q1);
 
                   label(c,"Desperdicio %");
-                  d1=edit("Ej. 3"); addFull(c,d1);
+                  d1=edit("Ingrese desperdicio %, ej. 3"); addFull(c,d1);
 
                   Button b=calcButton("▣   CALCULAR PESO");
                   c.addView(b,margins(-1,52,0,2,0,8));
