@@ -1,4 +1,4 @@
-name: Generar APK V3 - La Doble B
+name: Generar APK V3 Mejorada - La Doble B
 
 "on": {workflow_dispatch: {}}
 
@@ -40,7 +40,7 @@ jobs:
 
           cat > build.gradle <<'EOF'
           plugins {
-              id 'com.android.application' version '8.2.2' apply false
+              id 'com.android.application' version '8.5.2' apply false
           }
           EOF
 
@@ -58,7 +58,7 @@ jobs:
                   minSdk 23
                   targetSdk 35
                   versionCode 3
-                  versionName '3.0'
+                  versionName '3.1'
               }
           }
           EOF
@@ -105,6 +105,9 @@ jobs:
           import android.graphics.Typeface;
           import android.graphics.drawable.GradientDrawable;
           import android.view.Gravity;
+          import android.view.inputmethod.EditorInfo;
+          import android.view.inputmethod.InputMethodManager;
+          import android.content.Context;
           import android.view.View;
           import android.view.ViewGroup;
           import android.widget.*;
@@ -173,7 +176,7 @@ jobs:
                   head.setGravity(Gravity.CENTER_VERTICAL);
                   head.setPadding(18,10,18,10);
                   head.setBackground(rounded(BLUE,30));
-                  page.addView(head,margins(-1,150,0,0,0,10));
+                  page.addView(head,margins(-1,165,0,0,0,10));
 
                   TextView recycle = text("♻",72,WHITE,true);
                   recycle.setGravity(Gravity.CENTER);
@@ -184,15 +187,15 @@ jobs:
                   titles.setGravity(Gravity.CENTER);
                   head.addView(titles,new LinearLayout.LayoutParams(0,-1,1));
 
-                  TextView a = text("PLÁSTICOS Y DESECHABLES",22,WHITE,true);
+                  TextView a = text("PLÁSTICOS Y DESECHABLES",20,WHITE,true);
                   a.setGravity(Gravity.CENTER);
                   titles.addView(a);
 
-                  TextView b = text("LA DOBLE B S.A.S.",36,WHITE,true);
+                  TextView b = text("LA DOBLE B S.A.S.",28,WHITE,true);
                   b.setGravity(Gravity.CENTER);
                   titles.addView(b);
 
-                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",17,WHITE,true);
+                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",15,WHITE,true);
                   app.setGravity(Gravity.CENTER);
                   app.setPadding(24,6,24,6);
                   app.setBackground(rounded(MID_BLUE,28));
@@ -284,6 +287,17 @@ jobs:
                   e.setBackground(outlined(WHITE,BORDER,15));
                   e.setInputType(android.text.InputType.TYPE_CLASS_NUMBER |
                           android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                  e.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                  e.setOnEditorActionListener((v, actionId, event) -> {
+                      if (actionId == EditorInfo.IME_ACTION_DONE ||
+                          (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+                          InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                          imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                          v.clearFocus();
+                          return true;
+                      }
+                      return false;
+                  });
                   return e;
               }
 
@@ -347,10 +361,10 @@ jobs:
                   box.setGravity(Gravity.CENTER_VERTICAL);
                   box.setPadding(12,5,12,5);
                   box.setBackground(outlined(WHITE,Color.rgb(203,226,248),15));
-                  r.addView(box,margins(-1,42,0,4,0,0));
-                  TextView n=text(name.toUpperCase(Locale.ROOT),10,DARK,true);
+                  r.addView(box,margins(-1,50,0,5,0,0));
+                  TextView n=text(name.toUpperCase(Locale.ROOT),11,DARK,true);
                   box.addView(n,new LinearLayout.LayoutParams(0,-1,1));
-                  TextView v=text(value,17,BLUE,true);
+                  TextView v=text(value,16,BLUE,true);
                   v.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
                   box.addView(v);
                   return v;
@@ -505,13 +519,14 @@ jobs:
           EOF
 
       - name: Compilar APK
-        shell: bash
-        run: |
-          gradle wrapper --gradle-version 8.2
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
-      - name: Guardar APK V3.1
+      - name: Ejecutar Gradle
+        run: gradle assembleDebug
+
+      - name: Entregar APK V3
         uses: actions/upload-artifact@v4
         with:
           name: CalculadoraPlasticos-LaDobleB-V3
