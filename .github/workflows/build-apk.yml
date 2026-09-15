@@ -1,4 +1,4 @@
-name: Generar APK V4 Vertical - La Doble B
+name: Generar APK V5 DEFINITIVA - La Doble B
 
 "on": {workflow_dispatch: {}}
 
@@ -57,8 +57,8 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 40
-                  versionName '4.0'
+                  versionCode 50
+                  versionName '5.0'
               }
           }
           GRADLE
@@ -167,7 +167,7 @@ jobs:
                   sv.setFillViewport(true);
                   LinearLayout page = new LinearLayout(this);
                   page.setOrientation(LinearLayout.VERTICAL);
-                  page.setPadding(14,10,14,18);
+                  page.setPadding(18,14,18,28);
                   page.setBackground(rounded(DARK,0));
                   sv.addView(page);
 
@@ -175,57 +175,60 @@ jobs:
                   LinearLayout head = new LinearLayout(this);
                   head.setOrientation(LinearLayout.VERTICAL);
                   head.setGravity(Gravity.CENTER);
-                  head.setPadding(18,16,18,18);
+                  head.setPadding(22,24,22,26);
                   head.setBackground(rounded(BLUE,28));
-                  page.addView(head,margins(-1,-2,0,0,0,12));
+                  page.addView(head,margins(-1,-2,0,0,0,18));
 
-                  TextView recycle = text("♻",58,WHITE,true);
+                  TextView recycle = text("♻",66,WHITE,true);
                   recycle.setGravity(Gravity.CENTER);
-                  head.addView(recycle,margins(-1,70,0,0,0,2));
+                  head.addView(recycle,margins(-1,82,0,0,0,6));
 
-                  TextView a = text("PLÁSTICOS Y DESECHABLES",20,WHITE,true);
+                  TextView a = text("PLÁSTICOS Y DESECHABLES",21,WHITE,true);
                   a.setGravity(Gravity.CENTER);
-                  head.addView(a,margins(-1,32,0,0,0,2));
+                  head.addView(a,margins(-1,44,0,0,0,6));
 
-                  TextView b = text("LA DOBLE B S.A.S.",24,WHITE,true);
+                  TextView b = text("LA DOBLE B S.A.S.",25,WHITE,true);
                   b.setGravity(Gravity.CENTER);
-                  head.addView(b,margins(-1,38,0,0,0,8));
+                  head.addView(b,margins(-1,48,0,0,0,12));
 
-                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",16,WHITE,true);
+                  TextView app = text("CALCULADORA DE PESO Y CALIBRE",17,WHITE,true);
                   app.setGravity(Gravity.CENTER);
-                  app.setPadding(14,8,14,8);
+                  app.setPadding(16,10,16,10);
                   app.setBackground(rounded(MID_BLUE,28));
-                  head.addView(app,margins(-1,48,0,0,0,8));
+                  app.setMinHeight(56);
+                   head.addView(app,margins(-1,-2,0,0,0,12));
 
-                  TextView slogan = text("Juntos por un planeta más limpio",15,WHITE,true);
+                  TextView slogan = text("Juntos por un planeta más limpio",16,WHITE,true);
                   slogan.setGravity(Gravity.CENTER);
-                  head.addView(slogan,margins(-1,28,0,0,0,0));
+                  head.addView(slogan,margins(-1,34,0,0,0,4));
 
                   // SELECTOR UNICO
                   LinearLayout selector = new LinearLayout(this);
                   selector.setOrientation(LinearLayout.VERTICAL);
-                  selector.setPadding(16,12,16,14);
+                  selector.setPadding(18,18,18,20);
                   selector.setBackground(outlined(WHITE,BORDER,22));
-                  page.addView(selector,margins(-1,-2,0,0,0,12));
+                  page.addView(selector,margins(-1,-2,0,0,0,18));
 
-                  TextView choose = text("¿QUÉ DESEA CALCULAR?",17,DARK,true);
+                  TextView choose = text("¿QUÉ DESEA CALCULAR?",18,DARK,true);
                   choose.setGravity(Gravity.CENTER);
-                  selector.addView(choose,margins(-1,34,0,0,0,6));
+                  selector.addView(choose,margins(-1,42,0,0,0,10));
 
                   RadioGroup group = new RadioGroup(this);
                   group.setOrientation(RadioGroup.VERTICAL);
                   rbWeight = radio("CALIBRE → PESO");
                   rbThickness = radio("PESO → CALIBRE");
-                  group.addView(rbWeight,margins(-1,54,0,0,0,6));
-                  group.addView(rbThickness,margins(-1,54,0,0,0,0));
+                  rbWeight.setMinHeight(62);
+                   group.addView(rbWeight,margins(-1,-2,0,0,0,10));
+                  rbThickness.setMinHeight(62);
+                   group.addView(rbThickness,margins(-1,-2,0,0,0,0));
                   rbWeight.setChecked(true);
                   selector.addView(group,margins(-1,-2,0,0,0,0));
 
                   // UNA SOLA COLUMNA
                   weightCard = card();
                   thicknessCard = card();
-                  page.addView(weightCard,margins(-1,-2,0,0,0,10));
-                  page.addView(thicknessCard,margins(-1,-2,0,0,0,10));
+                  page.addView(weightCard,margins(-1,-2,0,0,0,16));
+                  page.addView(thicknessCard,margins(-1,-2,0,0,0,16));
 
                   buildWeight(weightCard);
                   buildThickness(thicknessCard);
@@ -241,7 +244,7 @@ jobs:
                       }
                   });
 
-                  TextView foot = text("LA DOBLE B S.A.S.  •  PLÁSTICOS Y DESECHABLES  •  Versión 4.0",12,WHITE,true);
+                  TextView foot = text("LA DOBLE B S.A.S.  •  PLÁSTICOS Y DESECHABLES  •  Versión 5.0",12,WHITE,true);
                   foot.setGravity(Gravity.CENTER);
                   page.addView(foot,margins(-1,45,0,2,0,0));
 
@@ -267,37 +270,40 @@ jobs:
               LinearLayout card() {
                   LinearLayout c = new LinearLayout(this);
                   c.setOrientation(LinearLayout.VERTICAL);
-                  c.setPadding(16,16,16,18);
+                  c.setPadding(20,22,20,24);
                   c.setBackground(outlined(WHITE,Color.rgb(216,235,252),25));
                   c.setElevation(5);
                   return c;
               }
 
               void cardHeader(LinearLayout c,String title) {
-                  TextView t = text(title,21,WHITE,true);
+                  TextView t = text(title,23,WHITE,true);
                   t.setGravity(Gravity.CENTER);
-                  t.setPadding(12,0,12,0);
+                  t.setPadding(18,0,18,0);
                   t.setBackground(rounded(BLUE,22));
-                  c.addView(t,margins(-1,58,0,0,0,12));
+                  t.setMinHeight(68);
+                   c.addView(t,margins(-1,-2,0,0,0,18));
               }
 
               TextView label(LinearLayout c,String s) {
-                  TextView t = text(s.toUpperCase(Locale.ROOT),13,WHITE,true);
+                  TextView t = text(s.toUpperCase(Locale.ROOT),14,WHITE,true);
                   t.setGravity(Gravity.CENTER_VERTICAL);
-                  t.setPadding(16,0,16,0);
+                  t.setPadding(18,0,18,0);
                   t.setBackground(rounded(BLUE,20));
-                  c.addView(t,margins(-1,34,0,2,0,4));
+                  t.setMinHeight(40);
+                   c.addView(t,margins(-1,-2,0,4,0,8));
                   return t;
               }
 
               EditText edit(String hint) {
                   EditText e = new EditText(this);
                   e.setHint(hint);
-                  e.setTextSize(16);
+                  e.setTextSize(17);
                   e.setSingleLine(true);
+                   e.setMinHeight(58);
                   e.setTextColor(TEXT);
                   e.setHintTextColor(Color.rgb(120,145,175));
-                  e.setPadding(16,0,14,0);
+                  e.setPadding(18,0,18,0);
                   e.setBackground(outlined(WHITE,BORDER,15));
                   e.setInputType(android.text.InputType.TYPE_CLASS_NUMBER |
                           android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -321,10 +327,10 @@ jobs:
                           this,android.R.layout.simple_spinner_dropdown_item,items) {
                       @Override public View getView(int p,View v,ViewGroup parent) {
                           TextView t=(TextView)super.getView(p,v,parent);
-                          t.setTextSize(16);
+                          t.setTextSize(17);
                           t.setTextColor(TEXT);
                           t.setGravity(Gravity.CENTER_VERTICAL);
-                          t.setPadding(14,0,14,0);
+                          t.setPadding(16,0,16,0);
                           return t;
                       }
                   };
@@ -334,14 +340,14 @@ jobs:
               }
 
               void addFull(LinearLayout c,View v) {
-                  c.addView(v,margins(-1,52,0,0,0,8));
+                  c.addView(v,margins(-1,58,0,0,0,12));
               }
 
               Button calcButton(String s) {
                   Button b=new Button(this);
                   b.setText(s);
                   b.setTextColor(WHITE);
-                  b.setTextSize(17);
+                  b.setTextSize(18);
                   b.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
                   b.setAllCaps(false);
                   b.setBackground(rounded(BLUE,22));
@@ -352,12 +358,12 @@ jobs:
               LinearLayout results(LinearLayout c) {
                   LinearLayout r=new LinearLayout(this);
                   r.setOrientation(LinearLayout.VERTICAL);
-                  r.setPadding(12,10,12,12);
-                  r.setBackground(rounded(LIGHT,20));
+                  r.setPadding(16,16,16,18);
+                  r.setBackground(rounded(LIGHT,22));
                   c.addView(r,margins(-1,-2,0,4,0,0));
-                  TextView h=text("RESULTADOS",15,DARK,true);
+                  TextView h=text("RESULTADOS",17,DARK,true);
                   h.setGravity(Gravity.CENTER);
-                  r.addView(h,margins(-1,30,0,0,0,8));
+                  r.addView(h,margins(-1,38,0,0,0,12));
                   return r;
               }
 
@@ -367,13 +373,14 @@ jobs:
                   box.setGravity(Gravity.CENTER);
                   box.setPadding(12,6,12,6);
                   box.setBackground(outlined(WHITE,Color.rgb(203,226,248),15));
-                  r.addView(box,margins(-1,76,0,0,0,8));
-                  TextView n=text(name.toUpperCase(Locale.ROOT),12,DARK,true);
+                  box.setMinimumHeight(94);
+                   r.addView(box,margins(-1,-2,0,0,0,12));
+                  TextView n=text(name.toUpperCase(Locale.ROOT),13,DARK,true);
                   n.setGravity(Gravity.CENTER);
-                  box.addView(n,margins(-1,28,0,0,0,2));
-                  TextView v=text(value,20,BLUE,true);
+                  box.addView(n,margins(-1,34,0,0,0,4));
+                  TextView v=text(value,22,BLUE,true);
                   v.setGravity(Gravity.CENTER);
-                  box.addView(v,margins(-1,30,0,0,0,0));
+                  box.addView(v,margins(-1,42,0,0,0,0));
                   return v;
               }
 
@@ -408,7 +415,7 @@ jobs:
                   d1=edit("Ej. 3"); addFull(c,d1);
 
                   Button b=calcButton("▣   CALCULAR PESO");
-                  c.addView(b,margins(-1,58,0,4,0,10));
+                  c.addView(b,margins(-1,68,0,8,0,16));
                   b.setOnClickListener(v->calcWeight());
 
                   LinearLayout rr=results(c);
@@ -440,7 +447,7 @@ jobs:
                   p2=edit("Ej. 1.196"); addFull(c,p2);
 
                   Button b=calcButton("▣   CALCULAR CALIBRE");
-                  c.addView(b,margins(-1,58,0,4,0,10));
+                  c.addView(b,margins(-1,68,0,8,0,16));
                   b.setOnClickListener(v->calcThickness());
 
                   LinearLayout rr=results(c);
@@ -537,8 +544,8 @@ jobs:
       - name: Ejecutar Gradle
         run: gradle assembleDebug
 
-      - name: Entregar APK V4
+      - name: Entregar APK V5
         uses: actions/upload-artifact@v4
         with:
-          name: CalculadoraPlasticos-LaDobleB-V4-Vertical
+          name: CalculadoraPlasticos-LaDobleB-V5
           path: app/build/outputs/apk/debug/app-debug.apk
