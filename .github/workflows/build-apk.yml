@@ -1,21 +1,11 @@
-name: Generar APK Personalizada - La Doble B
+name: Generar APK V3 - La Doble B
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+jobs: build: runs-on: ubuntu-latest
 
     steps:
-      - name: Preparar Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Crear proyecto Android
-        shell: bash
+      - name: Crear proyecto Android V3
         run: |
           mkdir -p app/src/main/java/com/calculadoraplasticos/app
           mkdir -p app/src/main/res/values
@@ -35,19 +25,14 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "CalculadoraPlasticos"
+          rootProject.name = "CalculadoraPlasticosV3"
           include(":app")
           EOF
 
           cat > build.gradle <<'EOF'
           plugins {
-              id 'com.android.application' version '8.5.2' apply false
+              id 'com.android.application' version '8.2.2' apply false
           }
-          EOF
-
-          cat > gradle.properties <<'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
           EOF
 
           cat > app/build.gradle <<'EOF'
@@ -63,14 +48,13 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 2
-                  versionName '2.0'
+                  versionCode 3
+                  versionName '3.0'
               }
           }
           EOF
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:theme="@style/AppTheme"
@@ -91,13 +75,12 @@ jobs:
           EOF
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
                   <item name="android:fontFamily">sans</item>
-                  <item name="android:colorAccent">#1565C0</item>
-                  <item name="android:navigationBarColor">#FFFFFF</item>
-                  <item name="android:statusBarColor">#1565C0</item>
+                  <item name="android:colorAccent">#0D6EFD</item>
+                  <item name="android:navigationBarColor">#073B7A</item>
+                  <item name="android:statusBarColor">#0758B8</item>
                   <item name="android:windowLightStatusBar">false</item>
               </style>
           </resources>
@@ -109,198 +92,484 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.graphics.Color;
+          import android.graphics.Typeface;
           import android.graphics.drawable.GradientDrawable;
-          import android.text.InputType;
           import android.view.Gravity;
           import android.view.View;
+          import android.view.ViewGroup;
           import android.widget.*;
           import java.util.Locale;
 
           public class MainActivity extends Activity {
-              final String[] materials = {"PEAD","PEBD","LINEAL","PP"};
-              final double[] densities = {0.95,0.92,0.925,0.90};
 
-              Spinner material, dimUnit, thickUnit;
-              EditText width, length, layers, thickness, quantity, waste, bagWeight;
-              TextView resultWeight, resultTotal, resultRaw, resultMicrons, resultInches, resultMil;
+              final int BLUE = Color.rgb(13, 110, 253);
+              final int DARK_BLUE = Color.rgb(6, 59, 122);
+              final int LIGHT_BLUE = Color.rgb(232, 244, 255);
+              final int BORDER = Color.rgb(157, 205, 255);
+              final int TEXT = Color.rgb(35, 62, 95);
+              final int WHITE = Color.WHITE;
 
-              @Override public void onCreate(Bundle b) {
+              LinearLayout root;
+              Spinner mat1, dimUnit1, layer1, thickUnit1;
+              EditText width1, length1, thick1, qty1, waste1;
+              TextView resultWeight, resultNet, resultWaste;
+
+              Spinner mat2, dimUnit2, layer2;
+              EditText width2, length2, weight2;
+              TextView resultMicron, resultInch, resultMil;
+
+              @Override
+              protected void onCreate(Bundle b) {
                   super.onCreate(b);
-                  buildUI();
+                  buildScreen();
               }
 
-              int dp(int v) { return (int)(v * getResources().getDisplayMetrics().density + 0.5f); }
-
-              GradientDrawable bg(int color, int radius) {
-                  GradientDrawable g=new GradientDrawable();
-                  g.setColor(color);
-                  g.setCornerRadius(dp(radius));
-                  return g;
+              GradientDrawable bg(int color, float radius) {
+                  GradientDrawable d = new GradientDrawable();
+                  d.setColor(color);
+                  d.setCornerRadius(radius);
+                  return d;
               }
 
-              TextView tv(String s, int sp) {
-                  TextView t=new TextView(this);
-                  t.setText(s); t.setTextSize(sp); t.setTextColor(Color.rgb(35,48,65));
-                  t.setPadding(0,10,0,6); return t;
+              GradientDrawable borderBg(int color, int stroke, float radius) {
+                  GradientDrawable d = bg(color, radius);
+                  d.setStroke(2, stroke);
+                  return d;
               }
 
-              EditText edit(String hint) {
-                  EditText e=new EditText(this);
-                  e.setHint(hint); e.setTextSize(16);
-                  e.setTextColor(Color.rgb(35,48,65));
-                  e.setHintTextColor(Color.rgb(125,140,160));
-                  e.setPadding(dp(14),0,dp(14),0);
-                  e.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                  e.setSingleLine(true); e.setMinHeight(dp(52));
-                  e.setBackground(bg(Color.WHITE,12)); return e;
+              TextView tv(String text, float size, int color, boolean bold) {
+                  TextView t = new TextView(this);
+                  t.setText(text);
+                  t.setTextSize(size);
+                  t.setTextColor(color);
+                  t.setTypeface(Typeface.DEFAULT, bold ? Typeface.BOLD : Typeface.NORMAL);
+                  return t;
               }
 
-              Spinner spin(String[] arr) {
-                  Spinner s=new Spinner(this);
-                  ArrayAdapter<String> a=new ArrayAdapter<String>(
-                      this, android.R.layout.simple_spinner_dropdown_item, arr);
-                  s.setAdapter(a); s.setBackground(bg(Color.WHITE,12));
-                  s.setMinimumHeight(dp(52)); return s;
+              LinearLayout.LayoutParams lp(int w, int h, int top, int bottom) {
+                  LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(w, h);
+                  p.setMargins(0, top, 0, bottom);
+                  return p;
               }
 
-              Button btn(String s) {
-                  Button b=new Button(this);
-                  b.setText(s); b.setAllCaps(false);
-                  b.setTextColor(Color.WHITE); b.setTextSize(16);
-                  b.setBackground(bg(Color.rgb(13,110,253),14));
-                  b.setMinHeight(dp(54)); return b;
+              LinearLayout.LayoutParams fieldLp() {
+                  LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, 54);
+                  p.setMargins(0, 4, 0, 12);
+                  return p;
               }
 
-              LinearLayout section(String title) {
-                  LinearLayout box=new LinearLayout(this);
-                  box.setOrientation(LinearLayout.VERTICAL);
-                  box.setPadding(dp(18),dp(16),dp(18),dp(18));
-                  box.setBackground(bg(Color.WHITE,18));
-                  TextView h=tv(title,20);
-                  h.setTextColor(Color.rgb(8,55,115));
-                  h.setTypeface(null, android.graphics.Typeface.BOLD);
-                  h.setGravity(Gravity.CENTER_VERTICAL);
-                  box.addView(h); return box;
+              TextView label(String text) {
+                  TextView t = tv(text.toUpperCase(Locale.ROOT), 12, WHITE, true);
+                  t.setGravity(Gravity.CENTER_VERTICAL);
+                  t.setPadding(18, 0, 18, 0);
+                  t.setBackground(bg(BLUE, 24));
+                  t.setLayoutParams(new LinearLayout.LayoutParams(
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 36));
+                  return t;
               }
 
-              void add(LinearLayout p, View v) {
-                  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
-                  lp.topMargin=dp(6); lp.bottomMargin=dp(2); p.addView(v,lp);
+              void addLabel(LinearLayout box, String text) {
+                  box.addView(label(text));
+              }
+
+              EditText edit(String hint, boolean number) {
+                  EditText e = new EditText(this);
+                  e.setHint(hint);
+                  e.setTextSize(16);
+                  e.setSingleLine(true);
+                  e.setTextColor(TEXT);
+                  e.setHintTextColor(Color.rgb(125, 145, 170));
+                  e.setPadding(18, 0, 18, 0);
+                  e.setBackground(borderBg(WHITE, BORDER, 18));
+                  if (number) e.setInputType(android.text.InputType.TYPE_CLASS_NUMBER |
+                          android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                  e.setLayoutParams(fieldLp());
+                  return e;
+              }
+
+              Spinner spinner(String[] items) {
+                  Spinner s = new Spinner(this);
+                  ArrayAdapter<String> a = new ArrayAdapter<String>(
+                          this, android.R.layout.simple_spinner_dropdown_item, items) {
+                      @Override
+                      public View getView(int position, View convertView, android.view.ViewGroup parent) {
+                          TextView v = (TextView) super.getView(position, convertView, parent);
+                          v.setTextSize(16);
+                          v.setTextColor(TEXT);
+                          v.setGravity(Gravity.CENTER_VERTICAL);
+                          v.setPadding(16, 0, 16, 0);
+                          return v;
+                      }
+                  };
+                  s.setAdapter(a);
+                  s.setBackground(borderBg(WHITE, BORDER, 18));
+                  s.setPadding(6, 0, 6, 0);
+                  s.setLayoutParams(fieldLp());
+                  return s;
+              }
+
+              Button button(String text) {
+                  Button b = new Button(this);
+                  b.setText(text);
+                  b.setTextColor(WHITE);
+                  b.setTextSize(16);
+                  b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                  b.setAllCaps(false);
+                  b.setGravity(Gravity.CENTER);
+                  b.setBackground(bg(BLUE, 22));
+                  b.setPadding(8, 0, 8, 0);
+                  LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, 58);
+                  p.setMargins(0, 8, 0, 16);
+                  b.setLayoutParams(p);
+                  return b;
+              }
+
+              LinearLayout row(LinearLayout parent) {
+                  LinearLayout r = new LinearLayout(this);
+                  r.setOrientation(LinearLayout.HORIZONTAL);
+                  r.setGravity(Gravity.CENTER_VERTICAL);
+                  r.setLayoutParams(new LinearLayout.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                  parent.addView(r);
+                  return r;
+              }
+
+              EditText rowEdit(LinearLayout r, String hint, float weight) {
+                  EditText e = edit(hint, true);
+                  LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 54, weight);
+                  p.setMargins(0, 4, 8, 12);
+                  e.setLayoutParams(p);
+                  r.addView(e);
+                  return e;
+              }
+
+              Spinner rowSpinner(LinearLayout r, String[] items, float weight) {
+                  Spinner s = spinner(items);
+                  LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, 54, weight);
+                  p.setMargins(0, 4, 0, 12);
+                  s.setLayoutParams(p);
+                  r.addView(s);
+                  return s;
+              }
+
+              LinearLayout card(String title, String subtitle) {
+                  LinearLayout c = new LinearLayout(this);
+                  c.setOrientation(LinearLayout.VERTICAL);
+                  c.setPadding(18, 18, 18, 18);
+                  c.setBackground(borderBg(WHITE, Color.rgb(218, 233, 249), 28));
+                  c.setElevation(5);
+                  c.setLayoutParams(lp(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 0, 18));
+
+                  LinearLayout head = new LinearLayout(this);
+                  head.setOrientation(LinearLayout.VERTICAL);
+                  head.setPadding(18, 14, 18, 14);
+                  head.setBackground(bg(BLUE, 22));
+                  c.addView(head, new LinearLayout.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                  TextView h = tv(title, 20, WHITE, true);
+                  h.setPadding(0, 0, 0, 3);
+                  head.addView(h);
+
+                  TextView sub = tv(subtitle, 13, WHITE, false);
+                  head.addView(sub);
+
+                  return c;
+              }
+
+              void sectionTitle(LinearLayout box, String text) {
+                  TextView t = tv(text, 15, DARK_BLUE, true);
+                  t.setPadding(12, 16, 12, 8);
+                  box.addView(t);
+              }
+
+              LinearLayout resultsBox(String title) {
+                  LinearLayout r = new LinearLayout(this);
+                  r.setOrientation(LinearLayout.VERTICAL);
+                  r.setPadding(14, 12, 14, 14);
+                  r.setBackground(bg(LIGHT_BLUE, 22));
+                  r.setLayoutParams(lp(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 0, 4));
+                  TextView h = tv(title.toUpperCase(Locale.ROOT), 15, DARK_BLUE, true);
+                  h.setPadding(0, 0, 0, 8);
+                  r.addView(h);
+                  return r;
+              }
+
+              TextView resultLine(LinearLayout box, String label) {
+                  LinearLayout row = new LinearLayout(this);
+                  row.setOrientation(LinearLayout.HORIZONTAL);
+                  row.setGravity(Gravity.CENTER_VERTICAL);
+                  row.setPadding(14, 10, 14, 10);
+                  row.setBackground(borderBg(WHITE, Color.rgb(201, 225, 249), 18));
+                  row.setLayoutParams(lp(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 0, 7));
+
+                  TextView l = tv(label.toUpperCase(Locale.ROOT), 11, DARK_BLUE, true);
+                  row.addView(l, new LinearLayout.LayoutParams(0,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+
+                  TextView value = tv("0.000", 20, BLUE, true);
+                  value.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+                  row.addView(value);
+                  box.addView(row);
+                  return value;
+              }
+
+              void buildScreen() {
+                  ScrollView scroll = new ScrollView(this);
+                  scroll.setFillViewport(true);
+
+                  root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setPadding(14, 10, 14, 24);
+                  root.setBackground(bg(DARK_BLUE, 0));
+                  scroll.addView(root);
+
+                  LinearLayout header = new LinearLayout(this);
+                  header.setOrientation(LinearLayout.VERTICAL);
+                  header.setGravity(Gravity.CENTER);
+                  header.setPadding(10, 18, 10, 20);
+                  header.setBackground(bg(BLUE, 28));
+                  root.addView(header, lp(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 0, 16));
+
+                  TextView company = tv("PLÁSTICOS Y DESECHABLES", 19, WHITE, true);
+                  company.setGravity(Gravity.CENTER);
+                  header.addView(company);
+
+                  TextView company2 = tv("LA DOBLE B S.A.S.", 30, WHITE, true);
+                  company2.setGravity(Gravity.CENTER);
+                  header.addView(company2);
+
+                  TextView app = tv("CALCULADORA DE PESO Y CALIBRE", 15, WHITE, true);
+                  app.setGravity(Gravity.CENTER);
+                  app.setPadding(20, 9, 20, 9);
+                  app.setBackground(bg(Color.rgb(35, 148, 255), 28));
+                  header.addView(app, lp(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT, 8, 5));
+
+                  TextView motto = tv("Juntos por un planeta más limpio", 13, WHITE, false);
+                  motto.setGravity(Gravity.CENTER);
+                  header.addView(motto);
+
+                  buildWeightCard();
+                  buildThicknessCard();
+
+                  TextView footer = tv("LA DOBLE B S.A.S.\\nPLÁSTICOS Y DESECHABLES\\nVersión 3.0",
+                          12, WHITE, true);
+                  footer.setGravity(Gravity.CENTER);
+                  footer.setPadding(10, 18, 10, 8);
+                  root.addView(footer);
+
+                  setContentView(scroll);
+              }
+
+              void buildWeightCard() {
+                  LinearLayout c = card("1. CALIBRE → PESO",
+                          "Calcula el peso según el calibre y las dimensiones.");
+                  root.addView(c);
+
+                  addLabel(c, "Material");
+                  mat1 = spinner(new String[]{"PEAD", "PEBD", "LINEAL", "PP"});
+                  c.addView(mat1);
+
+                  addLabel(c, "Unidad de medida");
+                  dimUnit1 = spinner(new String[]{"Centímetros (cm)", "Pulgadas (in)"});
+                  c.addView(dimUnit1);
+
+                  addLabel(c, "Ancho");
+                  LinearLayout r1 = row(c);
+                  width1 = rowEdit(r1, "Ej. 30", 2);
+                  rowSpinner(r1, new String[]{"cm", "in"}, 1);
+
+                  addLabel(c, "Largo");
+                  LinearLayout r2 = row(c);
+                  length1 = rowEdit(r2, "Ej. 40", 2);
+                  rowSpinner(r2, new String[]{"cm", "in"}, 1);
+
+                  addLabel(c, "Caras / capas");
+                  layer1 = spinner(new String[]{"2 - Bolsa normal", "1 - Una cara", "3", "4"});
+                  c.addView(layer1);
+
+                  addLabel(c, "Unidad del calibre");
+                  thickUnit1 = spinner(new String[]{"Micrones (µm)", "Pulgadas (in)", "Mil"});
+                  c.addView(thickUnit1);
+
+                  addLabel(c, "Calibre / espesor");
+                  thick1 = edit("Ej. 20", true);
+                  c.addView(thick1);
+
+                  addLabel(c, "Cantidad de bolsas");
+                  qty1 = edit("Ej. 1000", true);
+                  c.addView(qty1);
+
+                  addLabel(c, "Desperdicio %");
+                  waste1 = edit("Ej. 3", true);
+                  c.addView(waste1);
+
+                  Button calc = button("CALCULAR PESO");
+                  c.addView(calc);
+                  calc.setOnClickListener(v -> calculateWeight());
+
+                  LinearLayout res = resultsBox("Resultados");
+                  resultWeight = resultLine(res, "Peso por bolsa");
+                  resultNet = resultLine(res, "Peso neto total");
+                  resultWaste = resultLine(res, "Materia prima + desperdicio");
+                  c.addView(res);
+              }
+
+              void buildThicknessCard() {
+                  LinearLayout c = card("2. PESO → CALIBRE",
+                          "Calcula el calibre según el peso de una bolsa.");
+                  root.addView(c);
+
+                  addLabel(c, "Material");
+                  mat2 = spinner(new String[]{"PEAD", "PEBD", "LINEAL", "PP"});
+                  c.addView(mat2);
+
+                  addLabel(c, "Unidad de medida");
+                  dimUnit2 = spinner(new String[]{"Centímetros (cm)", "Pulgadas (in)"});
+                  c.addView(dimUnit2);
+
+                  addLabel(c, "Ancho");
+                  LinearLayout r1 = row(c);
+                  width2 = rowEdit(r1, "Ej. 30", 2);
+                  rowSpinner(r1, new String[]{"cm", "in"}, 1);
+
+                  addLabel(c, "Largo");
+                  LinearLayout r2 = row(c);
+                  length2 = rowEdit(r2, "Ej. 40", 2);
+                  rowSpinner(r2, new String[]{"cm", "in"}, 1);
+
+                  addLabel(c, "Caras / capas");
+                  layer2 = spinner(new String[]{"2 - Bolsa normal", "1 - Una cara", "3", "4"});
+                  c.addView(layer2);
+
+                  addLabel(c, "Peso de una bolsa (gramos)");
+                  weight2 = edit("Ej. 12.35", true);
+                  c.addView(weight2);
+
+                  Button calc = button("CALCULAR CALIBRE");
+                  c.addView(calc);
+                  calc.setOnClickListener(v -> calculateThickness());
+
+                  LinearLayout res = resultsBox("Resultados");
+                  resultMicron = resultLine(res, "Micrones");
+                  resultInch = resultLine(res, "Pulgadas");
+                  resultMil = resultLine(res, "Mil");
+                  c.addView(res);
+              }
+
+              double density(String material) {
+                  if (material.equals("PEAD")) return 0.95;
+                  if (material.equals("PEBD")) return 0.92;
+                  if (material.equals("LINEAL")) return 0.925;
+                  return 0.90;
               }
 
               double num(EditText e) {
-                  try { return Double.parseDouble(e.getText().toString().replace(",",".")); }
-                  catch(Exception x) { return 0; }
+                  String s = e.getText().toString().trim().replace(",", ".");
+                  return s.isEmpty() ? 0 : Double.parseDouble(s);
               }
 
-              double density() { return densities[material.getSelectedItemPosition()]; }
+              double dimensionCm(EditText e, int spinnerIndex) {
+                  double x = num(e);
+                  return spinnerIndex == 1 ? x * 2.54 : x;
+              }
 
-              void buildUI() {
-                  ScrollView scroll=new ScrollView(this);
-                  LinearLayout root=new LinearLayout(this);
-                  root.setOrientation(LinearLayout.VERTICAL);
-                  root.setPadding(dp(12),dp(12),dp(12),dp(30));
-                  root.setBackground(bg(Color.rgb(8,55,115),0));
+              int layers(Spinner s) {
+                  String x = s.getSelectedItem().toString();
+                  if (x.startsWith("1")) return 1;
+                  if (x.startsWith("3")) return 3;
+                  if (x.startsWith("4")) return 4;
+                  return 2;
+              }
 
-                  TextView title=tv("PLÁSTICOS Y DESECHABLES\nLA DOBLE B S.A.S.",21);
-                  title.setTextColor(Color.WHITE);
-                  title.setTypeface(null, android.graphics.Typeface.BOLD);
-                  title.setGravity(Gravity.CENTER);
-                  root.addView(title);
+              double thicknessMicron(double value, int unit) {
+                  if (unit == 1) return value * 25400.0;
+                  if (unit == 2) return value * 25.4;
+                  return value;
+              }
 
-                  TextView sub=tv("CALCULADORA DE PESO Y CALIBRE\nPEAD • PEBD • LINEAL • PP",14);
-                  sub.setTextColor(Color.rgb(210,230,250));
-                  sub.setGravity(Gravity.CENTER);
-                  root.addView(sub);
+              void calculateWeight() {
+                  try {
+                      double w = dimensionCm(width1, 0);
+                      double l = dimensionCm(length1, 0);
+                      // Los selectores pequeños junto a ancho/largo usan cm/in.
+                      // Si el selector principal se cambia a pulgadas, también se aplica.
+                      if (dimUnit1.getSelectedItemPosition() == 1) {
+                          w = num(width1) * 2.54;
+                          l = num(length1) * 2.54;
+                      }
+                      double t = thicknessMicron(num(thick1), thickUnit1.getSelectedItemPosition());
+                      int lay = layers(layer1);
+                      double d = density(mat1.getSelectedItem().toString());
 
-                  LinearLayout a=section("1. CALIBRE / ESPESOR → PESO");
-                  add(a,tv("Material",15));
-                  material=spin(materials); add(a,material);
-                  add(a,tv("Unidad de medidas",15));
-                  dimUnit=spin(new String[]{"cm","pulgadas"}); add(a,dimUnit);
-                  width=edit("Ancho"); length=edit("Largo");
-                  layers=edit("Caras / capas (normal: 2)");
-                  add(a,width); add(a,length); add(a,layers);
-                  add(a,tv("Unidad del calibre / espesor",15));
-                  thickUnit=spin(new String[]{"micrones","pulgadas"}); add(a,thickUnit);
-                  thickness=edit("Calibre / espesor"); add(a,thickness);
-                  quantity=edit("Cantidad de bolsas");
-                  waste=edit("Desperdicio % (ej. 3)");
-                  add(a,quantity); add(a,waste);
+                      if (w <= 0 || l <= 0 || t <= 0) {
+                          Toast.makeText(this, "Completa ancho, largo y calibre.", Toast.LENGTH_SHORT).show();
+                          return;
+                      }
 
-                  Button calc=btn("CALCULAR PESO"); add(a,calc);
-                  resultWeight=tv("Peso por bolsa: —",18);
-                  resultTotal=tv("Peso neto total: —",18);
-                  resultRaw=tv("Materia prima + desperdicio: —",18);
-                  add(a,resultWeight); add(a,resultTotal); add(a,resultRaw);
-                  LinearLayout.LayoutParams pa=new LinearLayout.LayoutParams(-1,-2);
-                  pa.topMargin=dp(12); root.addView(a,pa);
+                      double grams = w * l * t * d * lay / 10000.0;
+                      double qty = num(qty1);
+                      if (qty <= 0) qty = 1;
+                      double waste = num(waste1);
+                      double netKg = grams * qty / 1000.0;
+                      double totalKg = netKg * (1.0 + waste / 100.0);
 
-                  LinearLayout c=section("2. PESO → CALIBRE / ESPESOR");
-                  EditText w2=edit("Ancho");
-                  EditText l2=edit("Largo");
-                  EditText lay2=edit("Caras / capas (normal: 2)");
-                  bagWeight=edit("Peso de UNA bolsa en gramos");
-                  add(c,tv("Usa el mismo material y unidad seleccionados arriba.",14));
-                  add(c,w2); add(c,l2); add(c,lay2); add(c,bagWeight);
+                      resultWeight.setText(String.format(Locale.US, "%.3f g", grams));
+                      resultNet.setText(String.format(Locale.US, "%.3f kg", netKg));
+                      resultWaste.setText(String.format(Locale.US, "%.3f kg", totalKg));
+                  } catch (Exception e) {
+                      Toast.makeText(this, "Revisa los datos ingresados.", Toast.LENGTH_SHORT).show();
+                  }
+              }
 
-                  Button inv=btn("CALCULAR CALIBRE"); add(c,inv);
-                  resultMicrons=tv("Micrones: —",18);
-                  resultInches=tv("Pulgadas: —",18);
-                  resultMil=tv("Mil: —",18);
-                  add(c,resultMicrons); add(c,resultInches); add(c,resultMil);
-                  LinearLayout.LayoutParams pc=new LinearLayout.LayoutParams(-1,-2);
-                  pc.topMargin=dp(12); root.addView(c,pc);
+              void calculateThickness() {
+                  try {
+                      double w = num(width2);
+                      double l = num(length2);
+                      if (dimUnit2.getSelectedItemPosition() == 1) {
+                          w *= 2.54;
+                          l *= 2.54;
+                      }
+                      double weight = num(weight2);
+                      int lay = layers(layer2);
+                      double d = density(mat2.getSelectedItem().toString());
 
-                  LinearLayout r=section("REFERENCIA DE DENSIDADES");
-                  add(r,tv(
-                      "PEAD  0,950 g/cm³\nPEBD  0,920 g/cm³\nLINEAL  0,925 g/cm³\nPP  0,900 g/cm³\n\n"+
-                      "Fórmula bolsa plana:\nPeso (g) = ancho(cm) × largo(cm) × micrones × densidad × capas ÷ 10.000",15));
-                  LinearLayout.LayoutParams pr=new LinearLayout.LayoutParams(-1,-2);
-                  pr.topMargin=dp(12); root.addView(r,pr);
+                      if (w <= 0 || l <= 0 || weight <= 0) {
+                          Toast.makeText(this, "Completa ancho, largo y peso.", Toast.LENGTH_SHORT).show();
+                          return;
+                      }
 
-                  calc.setOnClickListener(v -> {
-                      double ww=num(width), ll=num(length), lay=num(layers);
-                      if(lay<=0) lay=2;
-                      double th=num(thickness);
-                      if(dimUnit.getSelectedItemPosition()==1){ww*=2.54;ll*=2.54;}
-                      if(thickUnit.getSelectedItemPosition()==1) th*=25400.0;
-                      double grams=ww*ll*th*density()*lay/10000.0;
-                      double qty=num(quantity), wp=num(waste)/100.0;
-                      resultWeight.setText(String.format(Locale.US,"Peso por bolsa: %.3f g",grams));
-                      resultTotal.setText(String.format(Locale.US,"Peso neto total: %.3f kg",grams*qty/1000.0));
-                      resultRaw.setText(String.format(Locale.US,
-                          "Materia prima + desperdicio: %.3f kg",
-                          grams*qty*(1+wp)/1000.0));
-                  });
+                      double micron = weight * 10000.0 / (w * l * d * lay);
+                      double inch = micron / 25400.0;
+                      double mil = micron / 25.4;
 
-                  inv.setOnClickListener(v -> {
-                      double ww=num(w2),ll=num(l2),lay=num(lay2);
-                      if(lay<=0) lay=2;
-                      if(dimUnit.getSelectedItemPosition()==1){ww*=2.54;ll*=2.54;}
-                      double g=num(bagWeight);
-                      double mic=g*10000.0/(ww*ll*density()*lay);
-                      resultMicrons.setText(String.format(Locale.US,"Micrones: %.3f µm",mic));
-                      resultInches.setText(String.format(Locale.US,"Pulgadas: %.6f in",mic/25400.0));
-                      resultMil.setText(String.format(Locale.US,"Mil: %.4f mil",mic/25.4));
-                  });
-
-                  scroll.addView(root);
-                  setContentView(scroll);
+                      resultMicron.setText(String.format(Locale.US, "%.3f µm", micron));
+                      resultInch.setText(String.format(Locale.US, "%.7f in", inch));
+                      resultMil.setText(String.format(Locale.US, "%.4f mil", mil));
+                  } catch (Exception e) {
+                      Toast.makeText(this, "Revisa los datos ingresados.", Toast.LENGTH_SHORT).show();
+                  }
               }
           }
           EOF
 
-      - name: Compilar APK
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
+      - name: Configurar Gradle
+        run: |
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
 
-      - name: Ejecutar Gradle
-        run: gradle assembleDebug
+      - name: Compilar APK V3
+        run: ./gradlew assembleDebug
 
-      - name: Entregar APK
+      - name: Guardar APK V3
         uses: actions/upload-artifact@v4
         with:
-          name: CalculadoraPlasticos-LaDobleB-v2
+          name: CalculadoraPlasticos-LaDobleB-v3
           path: app/build/outputs/apk/debug/app-debug.apk
