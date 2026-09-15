@@ -185,22 +185,28 @@ jobs:
 
                   TextView a = text("PLÁSTICOS Y DESECHABLES",21,WHITE,true);
                   a.setGravity(Gravity.CENTER);
-                  head.addView(a,margins(-1,44,0,0,0,6));
+                  a.setMaxLines(2);
+                  a.setPadding(10,6,10,6);
+                  head.addView(a,margins(-1,-2,0,0,0,8));
 
                   TextView b = text("LA DOBLE B S.A.S.",25,WHITE,true);
                   b.setGravity(Gravity.CENTER);
-                  head.addView(b,margins(-1,48,0,0,0,12));
+                  b.setMaxLines(2);
+                  b.setPadding(10,8,10,8);
+                  head.addView(b,margins(-1,-2,0,0,0,14));
 
                   TextView app = text("CALCULADORA DE PESO Y CALIBRE",17,WHITE,true);
                   app.setGravity(Gravity.CENTER);
                   app.setPadding(16,10,16,10);
                   app.setBackground(rounded(MID_BLUE,28));
-                  app.setMinHeight(56);
-                   head.addView(app,margins(-1,-2,0,0,0,12));
+                  app.setMinHeight(72);
+                  app.setMaxLines(2);
+                  head.addView(app,margins(-1,-2,0,0,0,14));
 
                   TextView slogan = text("Juntos por un planeta más limpio",16,WHITE,true);
                   slogan.setGravity(Gravity.CENTER);
-                  head.addView(slogan,margins(-1,34,0,0,0,4));
+                  slogan.setPadding(10,6,10,6);
+                  head.addView(slogan,margins(-1,-2,0,0,0,6));
 
                   // SELECTOR UNICO
                   LinearLayout selector = new LinearLayout(this);
@@ -246,7 +252,9 @@ jobs:
 
                   TextView foot = text("LA DOBLE B S.A.S.  •  PLÁSTICOS Y DESECHABLES  •  Versión 5.0",12,WHITE,true);
                   foot.setGravity(Gravity.CENTER);
-                  page.addView(foot,margins(-1,45,0,2,0,0));
+                  foot.setPadding(10,8,10,8);
+                  foot.setMaxLines(2);
+                  page.addView(foot,margins(-1,-2,0,6,0,0));
 
                   setContentView(sv);
               }
@@ -281,8 +289,10 @@ jobs:
                   t.setGravity(Gravity.CENTER);
                   t.setPadding(18,0,18,0);
                   t.setBackground(rounded(BLUE,22));
-                  t.setMinHeight(68);
-                   c.addView(t,margins(-1,-2,0,0,0,18));
+                  t.setMinHeight(82);
+                  t.setMaxLines(2);
+                  t.setPadding(18,10,18,10);
+                  c.addView(t,margins(-1,-2,0,0,0,20));
               }
 
               TextView label(LinearLayout c,String s) {
@@ -290,8 +300,10 @@ jobs:
                   t.setGravity(Gravity.CENTER_VERTICAL);
                   t.setPadding(18,0,18,0);
                   t.setBackground(rounded(BLUE,20));
-                  t.setMinHeight(40);
-                   c.addView(t,margins(-1,-2,0,4,0,8));
+                  t.setMinHeight(50);
+                  t.setMaxLines(2);
+                  t.setPadding(18,6,18,6);
+                  c.addView(t,margins(-1,-2,0,4,0,10));
                   return t;
               }
 
@@ -340,7 +352,7 @@ jobs:
               }
 
               void addFull(LinearLayout c,View v) {
-                  c.addView(v,margins(-1,58,0,0,0,12));
+                  c.addView(v,margins(-1,64,0,0,0,14));
               }
 
               Button calcButton(String s) {
@@ -352,6 +364,8 @@ jobs:
                   b.setAllCaps(false);
                   b.setBackground(rounded(BLUE,22));
                   b.setGravity(Gravity.CENTER);
+                  b.setMinHeight(76);
+                  b.setPadding(18,10,18,10);
                   return b;
               }
 
@@ -373,14 +387,19 @@ jobs:
                   box.setGravity(Gravity.CENTER);
                   box.setPadding(12,6,12,6);
                   box.setBackground(outlined(WHITE,Color.rgb(203,226,248),15));
-                  box.setMinimumHeight(94);
-                   r.addView(box,margins(-1,-2,0,0,0,12));
+                  box.setMinimumHeight(188);
+                  box.setPadding(16,16,16,16);
+                  r.addView(box,margins(-1,-2,0,0,0,16));
                   TextView n=text(name.toUpperCase(Locale.ROOT),13,DARK,true);
                   n.setGravity(Gravity.CENTER);
-                  box.addView(n,margins(-1,34,0,0,0,4));
+                  n.setMaxLines(2);
+                  n.setPadding(8,8,8,8);
+                  box.addView(n,margins(-1,-2,0,0,0,8));
                   TextView v=text(value,22,BLUE,true);
                   v.setGravity(Gravity.CENTER);
-                  box.addView(v,margins(-1,42,0,0,0,0));
+                  v.setMaxLines(2);
+                  v.setPadding(8,8,8,8);
+                  box.addView(v,margins(-1,-2,0,0,0,0));
                   return v;
               }
 
