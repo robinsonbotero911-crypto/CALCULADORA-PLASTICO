@@ -1,4 +1,4 @@
-name: Generar APK Calculadora de Plásticos
+name: Generar APK Personalizada - La Doble B
 
 on:
   workflow_dispatch:
@@ -63,8 +63,8 @@ jobs:
                   applicationId 'com.calculadoraplasticos.app'
                   minSdk 23
                   targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
+                  versionCode 2
+                  versionName '2.0'
               }
           }
           EOF
@@ -74,7 +74,7 @@ jobs:
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:theme="@style/AppTheme"
-                  android:label="Calculadora de Plásticos"
+                  android:label="La Doble B - Calculadora"
                   android:allowBackup="true"
                   android:supportsRtl="true">
                   <activity
@@ -109,6 +109,7 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.graphics.Color;
+          import android.graphics.drawable.GradientDrawable;
           import android.text.InputType;
           import android.view.Gravity;
           import android.view.View;
@@ -128,43 +129,63 @@ jobs:
                   buildUI();
               }
 
+              int dp(int v) { return (int)(v * getResources().getDisplayMetrics().density + 0.5f); }
+
+              GradientDrawable bg(int color, int radius) {
+                  GradientDrawable g=new GradientDrawable();
+                  g.setColor(color);
+                  g.setCornerRadius(dp(radius));
+                  return g;
+              }
+
               TextView tv(String s, int sp) {
                   TextView t=new TextView(this);
-                  t.setText(s); t.setTextSize(sp); t.setTextColor(Color.DKGRAY);
+                  t.setText(s); t.setTextSize(sp); t.setTextColor(Color.rgb(35,48,65));
                   t.setPadding(0,10,0,6); return t;
               }
 
               EditText edit(String hint) {
                   EditText e=new EditText(this);
                   e.setHint(hint); e.setTextSize(16);
+                  e.setTextColor(Color.rgb(35,48,65));
+                  e.setHintTextColor(Color.rgb(125,140,160));
+                  e.setPadding(dp(14),0,dp(14),0);
                   e.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                  e.setSingleLine(true); return e;
+                  e.setSingleLine(true); e.setMinHeight(dp(52));
+                  e.setBackground(bg(Color.WHITE,12)); return e;
               }
 
               Spinner spin(String[] arr) {
                   Spinner s=new Spinner(this);
                   ArrayAdapter<String> a=new ArrayAdapter<String>(
                       this, android.R.layout.simple_spinner_dropdown_item, arr);
-                  s.setAdapter(a); return s;
+                  s.setAdapter(a); s.setBackground(bg(Color.WHITE,12));
+                  s.setMinimumHeight(dp(52)); return s;
               }
 
               Button btn(String s) {
                   Button b=new Button(this);
-                  b.setText(s); b.setAllCaps(false); return b;
+                  b.setText(s); b.setAllCaps(false);
+                  b.setTextColor(Color.WHITE); b.setTextSize(16);
+                  b.setBackground(bg(Color.rgb(13,110,253),14));
+                  b.setMinHeight(dp(54)); return b;
               }
 
               LinearLayout section(String title) {
                   LinearLayout box=new LinearLayout(this);
                   box.setOrientation(LinearLayout.VERTICAL);
-                  box.setPadding(24,16,24,16);
+                  box.setPadding(dp(18),dp(16),dp(18),dp(18));
+                  box.setBackground(bg(Color.WHITE,18));
                   TextView h=tv(title,20);
-                  h.setTextColor(Color.rgb(21,101,192));
+                  h.setTextColor(Color.rgb(8,55,115));
+                  h.setTypeface(null, android.graphics.Typeface.BOLD);
                   h.setGravity(Gravity.CENTER_VERTICAL);
                   box.addView(h); return box;
               }
 
               void add(LinearLayout p, View v) {
-                  p.addView(v,new LinearLayout.LayoutParams(-1,-2));
+                  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+                  lp.topMargin=dp(6); lp.bottomMargin=dp(2); p.addView(v,lp);
               }
 
               double num(EditText e) {
@@ -178,14 +199,17 @@ jobs:
                   ScrollView scroll=new ScrollView(this);
                   LinearLayout root=new LinearLayout(this);
                   root.setOrientation(LinearLayout.VERTICAL);
-                  root.setPadding(18,12,18,30);
+                  root.setPadding(dp(12),dp(12),dp(12),dp(30));
+                  root.setBackground(bg(Color.rgb(8,55,115),0));
 
-                  TextView title=tv("CALCULADORA DE PLÁSTICOS",24);
-                  title.setTextColor(Color.rgb(21,101,192));
+                  TextView title=tv("PLÁSTICOS Y DESECHABLES\nLA DOBLE B S.A.S.",21);
+                  title.setTextColor(Color.WHITE);
+                  title.setTypeface(null, android.graphics.Typeface.BOLD);
                   title.setGravity(Gravity.CENTER);
                   root.addView(title);
 
-                  TextView sub=tv("PEAD • PEBD • LINEAL • PP",14);
+                  TextView sub=tv("CALCULADORA DE PESO Y CALIBRE\nPEAD • PEBD • LINEAL • PP",14);
+                  sub.setTextColor(Color.rgb(210,230,250));
                   sub.setGravity(Gravity.CENTER);
                   root.addView(sub);
 
@@ -209,7 +233,8 @@ jobs:
                   resultTotal=tv("Peso neto total: —",18);
                   resultRaw=tv("Materia prima + desperdicio: —",18);
                   add(a,resultWeight); add(a,resultTotal); add(a,resultRaw);
-                  root.addView(a);
+                  LinearLayout.LayoutParams pa=new LinearLayout.LayoutParams(-1,-2);
+                  pa.topMargin=dp(12); root.addView(a,pa);
 
                   LinearLayout c=section("2. PESO → CALIBRE / ESPESOR");
                   EditText w2=edit("Ancho");
@@ -224,13 +249,15 @@ jobs:
                   resultInches=tv("Pulgadas: —",18);
                   resultMil=tv("Mil: —",18);
                   add(c,resultMicrons); add(c,resultInches); add(c,resultMil);
-                  root.addView(c);
+                  LinearLayout.LayoutParams pc=new LinearLayout.LayoutParams(-1,-2);
+                  pc.topMargin=dp(12); root.addView(c,pc);
 
                   LinearLayout r=section("REFERENCIA DE DENSIDADES");
                   add(r,tv(
                       "PEAD  0,950 g/cm³\nPEBD  0,920 g/cm³\nLINEAL  0,925 g/cm³\nPP  0,900 g/cm³\n\n"+
                       "Fórmula bolsa plana:\nPeso (g) = ancho(cm) × largo(cm) × micrones × densidad × capas ÷ 10.000",15));
-                  root.addView(r);
+                  LinearLayout.LayoutParams pr=new LinearLayout.LayoutParams(-1,-2);
+                  pr.topMargin=dp(12); root.addView(r,pr);
 
                   calc.setOnClickListener(v -> {
                       double ww=num(width), ll=num(length), lay=num(layers);
@@ -275,5 +302,5 @@ jobs:
       - name: Entregar APK
         uses: actions/upload-artifact@v4
         with:
-          name: CalculadoraPlasticos-APK
+          name: CalculadoraPlasticos-LaDobleB-v2
           path: app/build/outputs/apk/debug/app-debug.apk
