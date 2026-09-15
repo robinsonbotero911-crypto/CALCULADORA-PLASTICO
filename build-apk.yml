@@ -1,0 +1,279 @@
+name: Generar APK Calculadora de Plásticos
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Preparar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Crear proyecto Android
+        shell: bash
+        run: |
+          mkdir -p app/src/main/java/com/calculadoraplasticos/app
+          mkdir -p app/src/main/res/values
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "CalculadoraPlasticos"
+          include(":app")
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+          }
+          EOF
+
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.calculadoraplasticos.app'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.calculadoraplasticos.app'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:theme="@style/AppTheme"
+                  android:label="Calculadora de Plásticos"
+                  android:allowBackup="true"
+                  android:supportsRtl="true">
+                  <activity
+                      android:name=".MainActivity"
+                      android:screenOrientation="portrait"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:colorAccent">#1565C0</item>
+                  <item name="android:navigationBarColor">#FFFFFF</item>
+                  <item name="android:statusBarColor">#1565C0</item>
+                  <item name="android:windowLightStatusBar">false</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/java/com/calculadoraplasticos/app/MainActivity.java <<'EOF'
+          package com.calculadoraplasticos.app;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.graphics.Color;
+          import android.text.InputType;
+          import android.view.Gravity;
+          import android.view.View;
+          import android.widget.*;
+          import java.util.Locale;
+
+          public class MainActivity extends Activity {
+              final String[] materials = {"PEAD","PEBD","LINEAL","PP"};
+              final double[] densities = {0.95,0.92,0.925,0.90};
+
+              Spinner material, dimUnit, thickUnit;
+              EditText width, length, layers, thickness, quantity, waste, bagWeight;
+              TextView resultWeight, resultTotal, resultRaw, resultMicrons, resultInches, resultMil;
+
+              @Override public void onCreate(Bundle b) {
+                  super.onCreate(b);
+                  buildUI();
+              }
+
+              TextView tv(String s, int sp) {
+                  TextView t=new TextView(this);
+                  t.setText(s); t.setTextSize(sp); t.setTextColor(Color.DKGRAY);
+                  t.setPadding(0,10,0,6); return t;
+              }
+
+              EditText edit(String hint) {
+                  EditText e=new EditText(this);
+                  e.setHint(hint); e.setTextSize(16);
+                  e.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                  e.setSingleLine(true); return e;
+              }
+
+              Spinner spin(String[] arr) {
+                  Spinner s=new Spinner(this);
+                  ArrayAdapter<String> a=new ArrayAdapter<String>(
+                      this, android.R.layout.simple_spinner_dropdown_item, arr);
+                  s.setAdapter(a); return s;
+              }
+
+              Button btn(String s) {
+                  Button b=new Button(this);
+                  b.setText(s); b.setAllCaps(false); return b;
+              }
+
+              LinearLayout section(String title) {
+                  LinearLayout box=new LinearLayout(this);
+                  box.setOrientation(LinearLayout.VERTICAL);
+                  box.setPadding(24,16,24,16);
+                  TextView h=tv(title,20);
+                  h.setTextColor(Color.rgb(21,101,192));
+                  h.setGravity(Gravity.CENTER_VERTICAL);
+                  box.addView(h); return box;
+              }
+
+              void add(LinearLayout p, View v) {
+                  p.addView(v,new LinearLayout.LayoutParams(-1,-2));
+              }
+
+              double num(EditText e) {
+                  try { return Double.parseDouble(e.getText().toString().replace(",",".")); }
+                  catch(Exception x) { return 0; }
+              }
+
+              double density() { return densities[material.getSelectedItemPosition()]; }
+
+              void buildUI() {
+                  ScrollView scroll=new ScrollView(this);
+                  LinearLayout root=new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setPadding(18,12,18,30);
+
+                  TextView title=tv("CALCULADORA DE PLÁSTICOS",24);
+                  title.setTextColor(Color.rgb(21,101,192));
+                  title.setGravity(Gravity.CENTER);
+                  root.addView(title);
+
+                  TextView sub=tv("PEAD • PEBD • LINEAL • PP",14);
+                  sub.setGravity(Gravity.CENTER);
+                  root.addView(sub);
+
+                  LinearLayout a=section("1. CALIBRE / ESPESOR → PESO");
+                  add(a,tv("Material",15));
+                  material=spin(materials); add(a,material);
+                  add(a,tv("Unidad de medidas",15));
+                  dimUnit=spin(new String[]{"cm","pulgadas"}); add(a,dimUnit);
+                  width=edit("Ancho"); length=edit("Largo");
+                  layers=edit("Caras / capas (normal: 2)");
+                  add(a,width); add(a,length); add(a,layers);
+                  add(a,tv("Unidad del calibre / espesor",15));
+                  thickUnit=spin(new String[]{"micrones","pulgadas"}); add(a,thickUnit);
+                  thickness=edit("Calibre / espesor"); add(a,thickness);
+                  quantity=edit("Cantidad de bolsas");
+                  waste=edit("Desperdicio % (ej. 3)");
+                  add(a,quantity); add(a,waste);
+
+                  Button calc=btn("CALCULAR PESO"); add(a,calc);
+                  resultWeight=tv("Peso por bolsa: —",18);
+                  resultTotal=tv("Peso neto total: —",18);
+                  resultRaw=tv("Materia prima + desperdicio: —",18);
+                  add(a,resultWeight); add(a,resultTotal); add(a,resultRaw);
+                  root.addView(a);
+
+                  LinearLayout c=section("2. PESO → CALIBRE / ESPESOR");
+                  EditText w2=edit("Ancho");
+                  EditText l2=edit("Largo");
+                  EditText lay2=edit("Caras / capas (normal: 2)");
+                  bagWeight=edit("Peso de UNA bolsa en gramos");
+                  add(c,tv("Usa el mismo material y unidad seleccionados arriba.",14));
+                  add(c,w2); add(c,l2); add(c,lay2); add(c,bagWeight);
+
+                  Button inv=btn("CALCULAR CALIBRE"); add(c,inv);
+                  resultMicrons=tv("Micrones: —",18);
+                  resultInches=tv("Pulgadas: —",18);
+                  resultMil=tv("Mil: —",18);
+                  add(c,resultMicrons); add(c,resultInches); add(c,resultMil);
+                  root.addView(c);
+
+                  LinearLayout r=section("REFERENCIA DE DENSIDADES");
+                  add(r,tv(
+                      "PEAD  0,950 g/cm³\nPEBD  0,920 g/cm³\nLINEAL  0,925 g/cm³\nPP  0,900 g/cm³\n\n"+
+                      "Fórmula bolsa plana:\nPeso (g) = ancho(cm) × largo(cm) × micrones × densidad × capas ÷ 10.000",15));
+                  root.addView(r);
+
+                  calc.setOnClickListener(v -> {
+                      double ww=num(width), ll=num(length), lay=num(layers);
+                      if(lay<=0) lay=2;
+                      double th=num(thickness);
+                      if(dimUnit.getSelectedItemPosition()==1){ww*=2.54;ll*=2.54;}
+                      if(thickUnit.getSelectedItemPosition()==1) th*=25400.0;
+                      double grams=ww*ll*th*density()*lay/10000.0;
+                      double qty=num(quantity), wp=num(waste)/100.0;
+                      resultWeight.setText(String.format(Locale.US,"Peso por bolsa: %.3f g",grams));
+                      resultTotal.setText(String.format(Locale.US,"Peso neto total: %.3f kg",grams*qty/1000.0));
+                      resultRaw.setText(String.format(Locale.US,
+                          "Materia prima + desperdicio: %.3f kg",
+                          grams*qty*(1+wp)/1000.0));
+                  });
+
+                  inv.setOnClickListener(v -> {
+                      double ww=num(w2),ll=num(l2),lay=num(lay2);
+                      if(lay<=0) lay=2;
+                      if(dimUnit.getSelectedItemPosition()==1){ww*=2.54;ll*=2.54;}
+                      double g=num(bagWeight);
+                      double mic=g*10000.0/(ww*ll*density()*lay);
+                      resultMicrons.setText(String.format(Locale.US,"Micrones: %.3f µm",mic));
+                      resultInches.setText(String.format(Locale.US,"Pulgadas: %.6f in",mic/25400.0));
+                      resultMil.setText(String.format(Locale.US,"Mil: %.4f mil",mic/25.4));
+                  });
+
+                  scroll.addView(root);
+                  setContentView(scroll);
+              }
+          }
+          EOF
+
+      - name: Compilar APK
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Ejecutar Gradle
+        run: gradle assembleDebug
+
+      - name: Entregar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CalculadoraPlasticos-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
